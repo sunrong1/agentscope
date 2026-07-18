@@ -15,7 +15,7 @@
 
 | 阶段 | 周期 | 目标 | 交付物 |
 |---|---|---|---|
-| Phase 1 宏观认知 | W1-W2 | 顶层设计、架构图 | ✅ `notes/phase-1/architecture.md`<br/>⏳ W1-D5 `notes/phase-1/distributed-topology.md` |
+| Phase 1 宏观认知 | W1-W2 | 顶层设计、架构图 | ✅ `notes/phase-1/architecture.md`<br/>✅ `notes/phase-1/class-diagrams.md`<br/>⏳ W1-D4 时序图 / W1-D5 分布式拓扑 |
 | Phase 2 核心深潜 | W3-W8 | 5 大核心模块 | 5 份源码注解 + 5 个独立 Demo |
 | Phase 3 实战构建 | W9+ | 提 PR | 至少 1 个被合并的 PR |
 
@@ -48,7 +48,8 @@
 
 - [x] 2026-07-18 W1-D1：clone 仓库，建学习分支
 - [x] 2026-07-18 W1-D2：Phase 1 骨架图（4 层 + Agent 钩子 + MessageBus + 工具流 + App 装配）
-- [ ] W1-D3-4：补 Mermaid 类图、读 `_base.py` 注释
+- [x] 2026-07-18 W1-D3：Phase 1 类图（Agent/Toolkit/MiddlewareBase/MessageBus 4 大类族 + 全景类图）
+- [ ] W1-D4：补时序图（agent.reply + tool call）
 - [ ] W1-D5：分布式拓扑图
-- [ ] W1-D6：架构评判文档
+- [ ] W1-D6：架构评判文档（ADR 格式 3 个关键决策）
 - [ ] W1-D7：周自检 + 公开承诺发布
