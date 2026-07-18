@@ -15,7 +15,7 @@
 
 | 阶段 | 周期 | 目标 | 交付物 |
 |---|---|---|---|
-| Phase 1 宏观认知 | W1-W2 | 顶层设计、架构图 | ✅ `notes/phase-1/architecture.md`<br/>✅ `notes/phase-1/class-diagrams.md`<br/>⏳ W1-D4 时序图 / W1-D5 分布式拓扑 |
+| Phase 1 宏观认知 | W1-W2 | 顶层设计、架构图 | ✅ architecture.md<br/>✅ class-diagrams.md<br/>✅ sequence-diagrams.md<br/>✅ LEARNING.md + 博客首发<br/>⏳ W1-D5 分布式拓扑 / W1-D6 ADR |
 | Phase 2 核心深潜 | W3-W8 | 5 大核心模块 | 5 份源码注解 + 5 个独立 Demo |
 | Phase 3 实战构建 | W9+ | 提 PR | 至少 1 个被合并的 PR |
 
@@ -54,7 +54,9 @@
 - [x] 2026-07-18 W1-D1：clone 仓库，建学习分支
 - [x] 2026-07-18 W1-D2：Phase 1 骨架图（4 层 + Agent 钩子 + MessageBus + 工具流 + App 装配）
 - [x] 2026-07-18 W1-D3：Phase 1 类图（Agent/Toolkit/MiddlewareBase/MessageBus 4 大类族 + 全景类图）
-- [ ] W1-D4：补时序图（agent.reply + tool call）
+- [x] 2026-07-18 W1-D4：Phase 1 时序图（reply/tool/middleware/压缩/SSE/session 锁 6 张）
+- [x] 2026-07-18 W1-D7：公开承诺 LEARNING.md + 多平台文案
+- [x] 2026-07-18 W1-W1：W1 学习总结已发布到 sunrong.site blog
 - [ ] W1-D5：分布式拓扑图
 - [ ] W1-D6：架构评判文档（ADR 格式 3 个关键决策）
-- [ ] W1-D7：周自检 + 公开承诺发布
+- [ ] W2 周末：周自检 + 收尾 Phase 1 + 进 Phase 2-W3
