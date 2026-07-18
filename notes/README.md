@@ -42,7 +42,12 @@
 
 ## 公开承诺
 
-> _在这里写下你的公开 Flag（博客/GitHub/朋友圈），让 ISTJ 的守时特质驱动你_
+> 📢 **已发布**：[仓库根 `LEARNING.md`](../LEARNING.md)
+>
+> 8 周成为 Agent 应用架构师。三个版本同步发布：
+> - 仓库 LEARNING.md（权威版，每交付物链接）
+> - 博客版（sunrong.site，同行可读）
+> - 社交媒体版（X/LinkedIn/朋友圈，短版）
 
 ## 进度看板
 
