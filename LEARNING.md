@@ -6,6 +6,13 @@
 > **学习对象**：[AgentScope 2.0](https://github.com/sunrong1/agentscope) · v2.0.4
 > **学习记录**：[`learning-journal` 分支](https://github.com/sunrong1/agentscope/tree/learning-journal)
 > **信条**：心外无理，至诚无息。
+>
+> ## ⚠️ 2026-07-19 重要更新：重置
+> **W1 期间 4 份长文档（架构图/类图/时序图/分布式）均由 AI 协助产出，作者未亲自读代码**。
+> 详情见 [`notes/personal/2026-07-19-重置与真学习.md`](notes/personal/2026-07-19-重置与真学习.md)。
+>
+> **W1 重新开始**：之前的产出降级为"学习地图"（标 ⚠️ 未经验证），新建 `notes/personal/` 写真学习笔记。
+> 公开承诺 8 周目标不变（Sep 12），但**度量标准改为"读懂代码"而非"产出文档"**。
 
 ---
 

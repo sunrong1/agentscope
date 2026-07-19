@@ -1,62 +1,79 @@
-# AgentScope 学习日志
+# 学习日志
 
 > **学习目标**：成为 Agent 应用架构师
 > **学习对象**：AgentScope 2.0（sunrong1/agentscope fork）
-> **方法论来源**：deepseek 提供的 3 阶段学习系统 + 自我修正
+> **当前状态**：W1 重新开始（详见 [`personal/2026-07-19-重置与真学习.md`](personal/2026-07-19-重置与真学习.md)）
 
-## 终极度量标准（学完应该长什么样）
+## 目录结构
 
-- [ ] 能拆解：画出核心架构图，讲清各组件职责与通信方式
-- [ ] 能扩展：独立开发自定义 Agent/Tool 并集成
-- [ ] 能排错：分布式部署、消息通信、状态同步问题有排查思路
-- [ ] 能评判：能说清设计优点与局限，知道何时用/不用
+```
+notes/
+├── README.md                # 本文件
+├── debug-log.md             # 错题本（跨切面）
+│
+├── personal/                # ⭐ 真学习笔记（过程，仅自己）
+│   ├── README.md
+│   └── YYYY-MM-DD-<主题>.md
+│
+├── learning-map/            # 🗺️ 学习地图（目标，未经验证）
+│   ├── architecture.md      # ⚠️ 2026-07-18 AI 协作产出，未读代码
+│   ├── class-diagrams.md    # ⚠️ 同上
+│   ├── sequence-diagrams.md # ⚠️ 同上
+│   ├── distributed-topology.md # ⚠️ 同上
+│   └── public-commit-drafts.md # ⚠️ 同上
+│
+└── tools/                   # 工具
+    ├── review.py            # SM-2 复习系统
+    └── review_data.json
+```
 
-## 阶段路线图
+## 工作流
 
-| 阶段 | 周期 | 目标 | 交付物 |
+```
+读代码 → 写 personal/ 笔记（过程）→ 积累够了 → 重写 learning-map/（产出）
+```
+
+**关键规则**：
+- `personal/` 是真实学习过程，可以乱、可以错、可以"我没懂"
+- `learning-map/` 是目标地图，但**每篇都有"⚠️ 未经验证"标记**
+- **禁止**从 learning-map 倒推 personal 笔记（那是编造）
+
+## 终极度量（学完应该长什么样）
+
+- [ ] 能拆解：画出核心架构图，**自己读的代码**
+- [ ] 能扩展：独立开发自定义 Agent/Tool，**基于真实理解**
+- [ ] 能排错：分布式部署问题有排查思路，**不是复述别人的话**
+- [ ] 能评判：能说清设计优点与局限，**有独立观点**
+
+## 8 周计划（2026-07-18 → 2026-09-12）
+
+| 阶段 | 周期 | 目标 | 真实交付物 |
 |---|---|---|---|
-| Phase 1 宏观认知 | W1-W2 | 顶层设计、架构图 | ✅ architecture.md<br/>✅ class-diagrams.md<br/>✅ sequence-diagrams.md<br/>✅ distributed-topology.md<br/>✅ LEARNING.md + 博客首发<br/>⏳ W1-D6 ADR 评判 |
-| Phase 2 核心深潜 | W3-W8 | 5 大核心模块 | 5 份源码注解 + 5 个独立 Demo |
-| Phase 3 实战构建 | W9+ | 提 PR | 至少 1 个被合并的 PR |
+| Phase 1 读懂 1 个核心类 | W1-2 | Agent 主体类精读 | `personal/` 里 10+ 篇笔记 |
+| Phase 2 读懂 5 大模块 | W3-7 | Middleware/Bus/Storage/Workspace/Tool | 25+ 篇 personal 笔记 + 1 个 Demo |
+| Phase 3 实战 | W8+ | 提 PR | 至少 1 个被合并的 PR |
 
-## 每周自检表（周五下午 30min 填写）
-
-> 链接列必须填上产出物路径
-
-| 周次 | 知：画类图/时序图 | 行：独立 Demo | 破：独立解的 bug | 建：提交代码/文档 | 状态 |
-|---|---|---|---|---|---|
-| W1 | | | | | |
-| W2 | | | | | |
-| W3 | | | | | |
-| W4 | | | | | |
-| W5 | | | | | |
-| W6 | | | | | |
-| W7 | | | | | |
-| W8 | | | | | |
-
-**规则**：连续 2 周"否"，启动 5-Why 分析。
-
-## 错题本
-
-见 `notes/debug-log.md`
-
-## 公开承诺
-
-> 📢 **已发布**：[仓库根 `LEARNING.md`](../LEARNING.md)
->
-> 8 周成为 Agent 应用架构师。三个版本同步发布：
-> - 仓库 LEARNING.md（权威版，每交付物链接）
-> - 博客版（sunrong.site，同行可读）
-> - 社交媒体版（X/LinkedIn/朋友圈，短版）
+**调整说明**：之前 Phase 1 是"画架构图"，现在改为"读懂 1 个核心类"——更扎实、更可验证。
 
 ## 进度看板
 
-- [x] 2026-07-18 W1-D1：clone 仓库，建学习分支
-- [x] 2026-07-18 W1-D2：Phase 1 骨架图（4 层 + Agent 钩子 + MessageBus + 工具流 + App 装配）
-- [x] 2026-07-18 W1-D3：Phase 1 类图（Agent/Toolkit/MiddlewareBase/MessageBus 4 大类族 + 全景类图）
-- [x] 2026-07-18 W1-D4：Phase 1 时序图（reply/tool/middleware/压缩/SSE/session 锁 6 张）
-- [x] 2026-07-18 W1-D5：Phase 1 分布式拓扑图（10 图 + 故障恢复 + 容量规划）
-- [x] 2026-07-18 W1-D7：公开承诺 LEARNING.md + 多平台文案
-- [x] 2026-07-18 W1-W1：W1 学习总结已发布到 sunrong.site blog
-- [ ] W1-D6：架构评判文档（ADR 格式 3 个关键决策）
-- [ ] W2 周末：周自检 + 收尾 Phase 1 + 进 Phase 2-W3
+- [x] 2026-07-19：诚实 reset，建立 personal/ 流程
+- [ ] 2026-07-19 起：每天 30-60 行精读 + personal 笔记
+- [ ] W2 周末：第一次周自检（用 review 系统对 personal 笔记打分）
+
+## 周自检表（周五下午 30min 填写）
+
+> 自检维度改为"学习动作"而非"产出"——避免"伪学习"
+
+| 周 | 读：精读行数 | 写：personal 笔记数 | 破：解决一个问题 | 建：跑通 1 个 demo |
+|---|---|---|---|---|
+| W1 | _ | 1 (重置说明) | 0 | 0 |
+| W2 | | | | |
+| W3 | | | | |
+| W4 | | | | |
+| W5 | | | | |
+| W6 | | | | |
+| W7 | | | | |
+| W8 | | | | |
+
+**规则**：连续两周读 < 100 行，启动 5-Why 分析。

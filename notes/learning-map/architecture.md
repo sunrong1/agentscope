@@ -1,5 +1,12 @@
 # AgentScope 2.0 架构全景图
 
+> ## ⚠️ 学习地图 / 未经验证
+> **本文档是"学习目标"，不是"学习成果"**。
+> 2026-07-18 写于 AI 协作，作者尚未亲自深入代码验证。**真实学习需从 `src/agentscope/agent/_agent.py` 重新开始**。
+> 详细反思见 [`notes/personal/2026-07-19-重置与真学习.md`](../personal/2026-07-19-重置与真学习.md)。
+
+---
+
 > **版本**：v2.0.4.post1
 > **代码基线**：`sunrong1/agentscope` @ `30ca3ef`
 > **学习者**：Dave (sunrong1)
