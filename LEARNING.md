@@ -25,12 +25,22 @@
 | W2-D2 | 7-21 | 145 | 3 | ⬜ ⬜ ⬜ ⬜ ⬜ ⬜ ⬜ |
 | W2-D3 | 7-22 | 230 | 2 | ⬜ ⬜ ⬜ ⬜ ⬜ ⬜ ⬜ |
 | W2-D4 | 7-23 | 371 | 4 | ⬜ ⬜ ⬜ ⬜ ⬜ ⬜ ⬜ |
-| **W2 累计** | | **846** | **10** | **W2 目标 750 行 / 5 笔记** |
-| W2-D5 | 7-24 | - | - | 待开始 |
+| W2-D5 | 7-24 | 200 | 1 | Q5 闭环 |
+| **W2 累计** | | **1046** | **11** | **W2 目标 750 行 / 5 笔记** |
 | W2-D6 | 7-25 | 自由 | - | 休息日 |
 | W2-D7 | 7-26 | 周自检 | - | - |
 
-**当前 W2 完成度**：行数 113% / 笔记 200%（严重超周目标）
+**当前 W2 完成度**：行数 139% / 笔记 220%（严重超周目标）
+
+## 🔥 W2 重大发现：Q5 真 bug 闭环
+
+**位置**：`src/agentscope/agent/_agent.py:705`
+
+**问题**：`_close_unfinished_tool_calls` 重复 emit `ToolResultStartEvent` 给 SUBMITTED 状态的 external tool
+
+**修复**：`if call_block.state not in (ToolCallState.ALLOWED, ToolCallState.SUBMITTED):`
+
+**Issue 草稿已写完**——待 W2 末写 reproduce 脚本后提交。
 
 ---
 
