@@ -32,6 +32,7 @@
 | W3-D1 | 7-27 | 460 | 3 | _inject + _check + _handle + _handle_messages 四段 |
 | W3-D2 | 7-28 | 219 | 2 | _batch + sequential + concurrent 三段 |
 | W3-D3 | 7-29 | 158 | 2 | _handle_error + _acting 收尾 |
+| W3-D4 | 7-30 | 117 | 1 | _into_queue + _split_context 收尾 |
 | **累计 W2 + W3** | | **1908** | **16** | **W2 目标 750 行 / 5 笔记** |
 
 **当前 W2 + W3-D1 累计**：行数 1870 / 笔记 15 = 249% / 300% W2 目标
