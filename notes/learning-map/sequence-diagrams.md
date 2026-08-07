@@ -27,7 +27,7 @@ sequenceDiagram
     participant Impl as _reply_impl()
     participant Check as _check_incoming_event()
     participant Handle as _handle_incoming_event/messages()
-    participant Loop as ReAct Loop
+    participant LoopNode as ReAct Loop
     participant Comp as compress_context()
     participant Reason as _reasoning()
     participant ReasonMW as _reasoning_middlewares
@@ -62,7 +62,7 @@ sequenceDiagram
     end
 
     loop while cur_iter < max_iters
-        Impl->>Loop: _check_next_action()
+        Impl->>LoopNode: _check_next_action()
         alt action = exit
             Impl-->>User: yield final Msg + return
         else action = reasoning
