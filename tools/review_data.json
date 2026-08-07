@@ -43,7 +43,7 @@
     "phase1-architecture": {
       "added_date": "2026-07-19",
       "difficulty_hint": 2,
-      "ef": 2.08,
+      "ef": 1.94,
       "fail_streak": 0,
       "file": "notes/phase-1/architecture.md",
       "history": [
@@ -67,18 +67,25 @@
           "interval": 12,
           "next_due": "2026-08-19",
           "score": 1
+        },
+        {
+          "date": "2026-08-07 02:07:53",
+          "ef": 1.94,
+          "interval": 23,
+          "next_due": "2026-08-30",
+          "score": 1
         }
       ],
       "id": "phase1-architecture",
-      "interval": 12,
+      "interval": 23,
       "is_leech": false,
       "is_mastered": false,
-      "last_review": "2026-08-07 00:00:12",
-      "next_due": "2026-08-19",
-      "reps": 3,
+      "last_review": "2026-08-07 02:07:53",
+      "next_due": "2026-08-30",
+      "reps": 4,
       "title": "Phase 1 架构全景（4 层 + 6 大原语）",
       "total_failures": 0,
-      "total_reviews": 3
+      "total_reviews": 4
     },
     "phase1-classes": {
       "added_date": "2026-07-19",
@@ -107,18 +114,25 @@
           "interval": 12,
           "next_due": "2026-08-19",
           "score": 1
+        },
+        {
+          "date": "2026-08-07 02:07:53",
+          "ef": 2.08,
+          "interval": 25,
+          "next_due": "2026-09-01",
+          "score": 2
         }
       ],
       "id": "phase1-classes",
-      "interval": 12,
+      "interval": 25,
       "is_leech": false,
       "is_mastered": false,
-      "last_review": "2026-08-07 00:00:15",
-      "next_due": "2026-08-19",
-      "reps": 3,
+      "last_review": "2026-08-07 02:07:53",
+      "next_due": "2026-09-01",
+      "reps": 4,
       "title": "Phase 1 核心类图（4 大类族）",
       "total_failures": 0,
-      "total_reviews": 3
+      "total_reviews": 4
     },
     "phase1-distributed": {
       "added_date": "2026-07-19",
@@ -147,23 +161,30 @@
           "interval": 6,
           "next_due": "2026-08-13",
           "score": 1
+        },
+        {
+          "date": "2026-08-07 02:07:53",
+          "ef": 1.68,
+          "interval": 10,
+          "next_due": "2026-08-17",
+          "score": 2
         }
       ],
       "id": "phase1-distributed",
-      "interval": 6,
+      "interval": 10,
       "is_leech": false,
       "is_mastered": false,
-      "last_review": "2026-08-07 00:00:12",
-      "next_due": "2026-08-13",
-      "reps": 2,
+      "last_review": "2026-08-07 02:07:53",
+      "next_due": "2026-08-17",
+      "reps": 3,
       "title": "Phase 1 分布式拓扑（10 图 + 故障恢复）",
       "total_failures": 1,
-      "total_reviews": 3
+      "total_reviews": 4
     },
     "phase1-sequences": {
       "added_date": "2026-07-19",
       "difficulty_hint": 2,
-      "ef": 2.08,
+      "ef": 1.94,
       "fail_streak": 0,
       "file": "notes/phase-1/sequence-diagrams.md",
       "history": [
@@ -187,18 +208,25 @@
           "interval": 12,
           "next_due": "2026-08-19",
           "score": 1
+        },
+        {
+          "date": "2026-08-07 02:07:53",
+          "ef": 1.94,
+          "interval": 23,
+          "next_due": "2026-08-30",
+          "score": 1
         }
       ],
       "id": "phase1-sequences",
-      "interval": 12,
+      "interval": 23,
       "is_leech": false,
       "is_mastered": false,
-      "last_review": "2026-08-07 00:00:15",
-      "next_due": "2026-08-19",
-      "reps": 3,
+      "last_review": "2026-08-07 02:07:53",
+      "next_due": "2026-08-30",
+      "reps": 4,
       "title": "Phase 1 时序图（6 套核心调用）",
       "total_failures": 0,
-      "total_reviews": 3
+      "total_reviews": 4
     }
   },
   "meta": {
