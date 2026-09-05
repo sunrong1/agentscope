@@ -33,6 +33,7 @@ from ...message import (
 from ...types import ReplyFinishedReason
 
 if TYPE_CHECKING:
+    from ._credential_binding import CredentialBindingBase
     from ...tool import ToolBase
     from ...workspace import WorkspaceBase
 
@@ -254,6 +255,11 @@ class ChannelBase(ABC):
         """Non-secret per-channel behaviour switches. Subclasses override;
         left empty when the platform exposes no options."""
 
+    credential_binding: type["CredentialBindingBase"] | None = None
+    """Provider letting an operator hand over credentials out of band
+    (scan a QR code, approve a consent screen) instead of pasting them.
+    Left ``None`` by platforms that only support the form."""
+
     def __init__(
         self,
         channel_id: str,
@@ -361,14 +367,16 @@ class ChannelBase(ABC):
                 data.append(block)
             elif isinstance(block, ThinkingBlock):
                 if show_thinking:
-                    parts.append(f"\n💭 {block.thinking}\n")
+                    parts.append(f"💭 {block.thinking}")
             elif isinstance(block, ToolCallBlock):
                 if show_tool_process:
-                    parts.append(f"\n🔧 Calling tool: {block.name}\n")
+                    parts.append(f"🔧 Calling tool: {block.name}")
             elif isinstance(block, ToolResultBlock):
                 if show_tool_process and isinstance(block.output, str):
                     parts.append(block.output)
-        text = "".join(parts).strip()
+        # Every block is already folded whole, and Markdown needs a blank
+        # line between them or thinking runs into the text that follows.
+        text = "\n\n".join(part for part in parts if part.strip()).strip()
         if reply.finished_reason == ReplyFinishedReason.ERROR:
             text = text or _AGENT_ERROR_REPLY
         elif not text and not data:

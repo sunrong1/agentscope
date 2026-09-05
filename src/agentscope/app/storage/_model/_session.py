@@ -111,6 +111,29 @@ class SessionKnowledgeConfig(BaseModel):
     """
 
 
+class SessionNaming(BaseModel):
+    """How :attr:`SessionConfig.name` is maintained."""
+
+    auto: bool = Field(
+        default=False,
+        description=(
+            "Whether the server may still replace the session name with "
+            "a title derived from the conversation."
+        ),
+    )
+    """Whether the display name is the server's to choose.
+
+    Set at creation for sessions created without an explicit name, and
+    cleared as soon as the name is settled — either by the user renaming
+    the session or by the generated title landing.
+
+    Defaults to ``False``, which is what makes this safe to add to an
+    existing deployment: records written before auto-naming existed carry
+    no ``naming`` block at all, so they load with ``auto=False`` and keep
+    whatever name they already have.
+    """
+
+
 class SessionConfig(BaseModel):
     """Session configuration — set at creation, updatable via PATCH."""
 
@@ -130,6 +153,9 @@ class SessionConfig(BaseModel):
         description="Display name for the session.",
     )
     """The session display name."""
+
+    naming: SessionNaming = Field(default_factory=SessionNaming)
+    """Who owns :attr:`name`; see :class:`SessionNaming`."""
 
     cwd: str | None = Field(
         default=None,
@@ -196,6 +222,11 @@ class SessionRecord(_RecordBase):
     to. Recorded so agent output can be delivered back to the right chat
     even on a background / scheduled wake, where no inbound message is
     available to supply it."""
+
+    source_chat_name: str | None = None
+    """For channel-created sessions, that chat's title when the platform
+    supplied one. Recorded because the name arrives with the inbound
+    message: a node that never holds the connection cannot look it up."""
 
     source_channel_id: str | None = None
     """For channel-created sessions, the owning channel id. Lets the
