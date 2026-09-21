@@ -735,9 +735,19 @@ class Agent:
             # Clear the read tool cache
             await self._clear_unreserved_read_cache(msgs_to_reserve)
 
+            # The current reply msg may be fully compressed, so keep its usage
+            current_reply_usage = self._get_reply_usage()
+
             # Update the context and summary
             self.state.summary = new_summary
             self.state.context = msgs_to_reserve
+
+            if (
+                current_reply_usage is not None
+                and self._get_reply_usage() is None
+            ):
+                self.state.append_context(self.name, [])
+                self.state.context[-1].usage = current_reply_usage
 
             # The compression call is not covered by the model call events,
             # so record its cost on the context tail to keep it in the token
@@ -1293,6 +1303,7 @@ class Agent:
                         id=self.state.reply_id,
                         name=self.name,
                         content=self.react_config.interruption_message,
+                        usage=self._get_reply_usage(),
                         finished_reason=ReplyFinishedReason.INTERRUPTED,
                     )
 
@@ -1823,27 +1834,12 @@ class Agent:
             )
             and not has_only_thinking_blocks
         ):
-            last_ctx = self._get_last_msg()
-            final_usage = (
-                Usage(
-                    input_tokens=last_ctx.usage.input_tokens,
-                    output_tokens=last_ctx.usage.output_tokens,
-                    cache_input_tokens=(
-                        last_ctx.usage.cache_input_tokens or 0
-                    ),
-                    cache_creation_input_tokens=(
-                        last_ctx.usage.cache_creation_input_tokens or 0
-                    ),
-                )
-                if last_ctx is not None and last_ctx.usage is not None
-                else None
-            )
             yield AssistantMsg(
                 id=self.state.reply_id,
                 name=self.name,
                 # Text only response message
                 content=list(completed_response.content),
-                usage=final_usage,
+                usage=self._get_reply_usage(),
                 # The INTERRUPTED case is excluded by the branch condition
                 finished_reason=ReplyFinishedReason.COMPLETED,
             )
@@ -2009,6 +2005,13 @@ class Agent:
         elif isinstance(event, ExternalExecutionResultEvent):
             # Directly append the execution results into context
             for tool_result in event.execution_results:
+                # Whoever executed this promised a shape; a result that
+                # breaks it is their bug to fix, and the reply stays
+                # parked so they can send it again.
+                tool = await self.toolkit.get_tool(tool_result.name)
+                if tool is not None:
+                    await tool.check_external_result(tool_result)
+
                 async for evt in self._convert_tool_chunk_to_event(
                     tool_result.id,
                     tool_result.output,
@@ -2499,7 +2502,7 @@ class Agent:
             except jsonschema.ValidationError as e:
                 raise AgentOrientedException(
                     f"Input validation failed for tool '{tool_call.name}': "
-                    f"{e.message}",
+                    f"{e.message} (at {e.json_path})",
                 ) from e
 
         # The exceptions that
@@ -3481,6 +3484,17 @@ class Agent:
             return last_msg
         return None
 
+    def _get_reply_usage(self) -> Usage | None:
+        """Get a copy of the accumulated usage for the current reply."""
+        last_msg = self._get_last_msg()
+        if (
+            last_msg is None
+            or last_msg.id != self.state.reply_id
+            or last_msg.usage is None
+        ):
+            return None
+        return last_msg.usage.model_copy()
+
     def _next_action(
         self,
         final_msg: Msg | None = None,
@@ -3553,6 +3567,7 @@ class Agent:
                     id=self.state.reply_id,
                     name=self.name,
                     content="The required structured output is generated.",
+                    usage=self._get_reply_usage(),
                     finished_reason=ReplyFinishedReason.COMPLETED,
                     structured_output=deepcopy(
                         self.state.reply_context.structured_output,
@@ -3599,6 +3614,7 @@ class Agent:
                         name=self.name,
                         content="The maximum reasoning-acting iterations "
                         "are exceeded.",
+                        usage=self._get_reply_usage(),
                         finished_reason=ReplyFinishedReason.EXCEED_MAX_ITERS,
                     ),
                 )
@@ -3733,6 +3749,7 @@ class Agent:
                     name=self.name,
                     content="The maximum reasoning-acting iterations are "
                     "exceeded.",
+                    usage=self._get_reply_usage(),
                     finished_reason=ReplyFinishedReason.EXCEED_MAX_ITERS,
                 ),
             )
