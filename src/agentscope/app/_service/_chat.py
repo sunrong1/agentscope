@@ -36,7 +36,7 @@ from ..storage import (
     AgentRecord,
     SessionNaming,
     SessionRecord,
-    SessionSource,
+    ChannelOrigin,
 )
 from ..storage._utils import _resolve_team_leader
 from .._manager import BackgroundTaskManager, SchedulerManager
@@ -896,17 +896,36 @@ class ChatService:
                 # 1c. Resolve the channel binding ONCE; the toolkit and the
                 # system-prompt attachment share it.
                 # -------------------------------------------------------------
+                channel_origin = (
+                    session_record.origin
+                    if isinstance(session_record.origin, ChannelOrigin)
+                    else None
+                )
                 channel = (
                     await self._channel_clients.get(
-                        session_record.source_channel_id,
+                        channel_origin.channel_id,
                     )
-                    if session_record.source_channel_id
+                    if channel_origin is not None
                     and self._channel_clients is not None
                     else None
                 )
+                chat_kind = (
+                    await channel.chat_kind(channel_origin.chat_id)
+                    if channel is not None and channel_origin is not None
+                    else None
+                )
+                # Channel tools that read as the session's user are only
+                # safe in a 1:1 chat. A group session is shared, so one
+                # member's turn would otherwise read with another's
+                # permissions.
                 channel_tools = (
-                    await channel.list_tools(workspace)
-                    if channel is not None
+                    await channel.list_tools(
+                        workspace,
+                        channel_origin.channel_user_id
+                        if chat_kind is ChatKind.PRIVATE
+                        else None,
+                    )
+                    if channel is not None and channel_origin is not None
                     else []
                 )
 
@@ -1064,13 +1083,11 @@ class ChatService:
                 attachment = f"You're within a session (id={session_id})."
 
                 # Channel-bound sessions: tell the agent which chat it serves.
-                if channel is not None:
+                if channel is not None and channel_origin is not None:
                     tools = ", ".join(t.name for t in channel_tools)
-                    chat_id = session_record.source_chat_id or ""
-                    kind = await channel.chat_kind(chat_id)
-                    name = (
-                        session_record.source_chat_name
-                        or await channel.chat_name(chat_id)
+                    chat_id = channel_origin.chat_id
+                    name = channel_origin.chat_name or await channel.chat_name(
+                        chat_id,
                     )
                     where = f' named "{name}"' if name else ""
                     attachment += (
@@ -1080,13 +1097,13 @@ class ChatService:
                         f"send there are relayed to you here, and your "
                         f"replies are delivered back to that same chat."
                     )
-                    if kind is ChatKind.GROUP:
+                    if chat_kind is ChatKind.GROUP:
                         attachment += (
                             " It is a group chat, so messages may come "
                             "from several different people; each incoming "
                             "user turn is labelled with its sender."
                         )
-                    elif kind is ChatKind.PRIVATE:
+                    elif chat_kind is ChatKind.PRIVATE:
                         attachment += (
                             " It is a one-to-one private chat with a "
                             "single user."
@@ -1147,15 +1164,13 @@ class ChatService:
             # channel's connection. Covers scheduled / background wakes,
             # not just inbound channel messages.
             if (
-                session_record.source == SessionSource.CHANNEL
-                and session_record.source_channel_id
-                and session_record.source_chat_id
+                isinstance(session_record.origin, ChannelOrigin)
                 and self._channel_clients is not None
             ):
                 await self._channel_clients.deliver(
                     session_id=session_id,
-                    channel_id=session_record.source_channel_id,
-                    chat_id=session_record.source_chat_id,
+                    channel_id=session_record.origin.channel_id,
+                    chat_id=session_record.origin.chat_id,
                     agent_id=agent_id,
                 )
             reply_msg: Msg | None = None
