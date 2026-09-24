@@ -214,6 +214,22 @@ class FakeTransport(TransportBase):
         )
 
 
+class GatedTransport(FakeTransport):
+    """Stays open until ``gate`` is set, then sends its control frames, so
+    a test decides when the user acts instead of a clock."""
+
+    def __init__(self, control_frames: list[ControlFrame]) -> None:
+        super().__init__(frames=0)
+        self.control_frames = control_frames
+        self.gate = asyncio.Event()
+
+    async def incoming(self) -> AsyncIterator[ControlFrame]:
+        """Emit the control frames once the gate opens, then end."""
+        await self.gate.wait()
+        for frame in self.control_frames:
+            yield frame
+
+
 class EndOnSecondFrameVAD(VADBase):
     """Reports the user starting on the first chunk and stopping on the
     second."""
@@ -322,6 +338,63 @@ class RealtimeAgentTest(IsolatedAsyncioTestCase):
             [("user", "讲个故事"), ("assistant", "从前有座山山里有座庙")],
         )
         self.assertEqual(agent.last_turn_metrics.first_audio_played_at, 1.0)
+
+    async def test_interrupt_stops_active_reply(self) -> None:
+        """``interrupt()`` cuts the reply in flight to what was heard."""
+        model = ScriptedModel([REPLY_R1])
+        agent = RealtimeAgent("Friday", "be brief", model)
+        transport = GatedTransport([])
+
+        reply_ends = []
+        async with agent, transport:
+            async for event in agent.reply_stream(transport):
+                if isinstance(event, TextBlockDeltaEvent):
+                    if event.delta == "老和尚":
+                        await agent.interrupt()
+                        transport.gate.set()
+                elif isinstance(event, ReplyEndEvent):
+                    reply_ends.append((event.reply_id, event.finished_reason))
+
+        self.assertListEqual(
+            reply_ends,
+            [("u1", "completed"), ("r1", "interrupted")],
+        )
+        self.assertEqual(transport.cleared, 1)
+        self.assertListEqual(
+            [(m.role, m.get_text_content()) for m in agent.state.context],
+            [("user", "讲个故事"), ("assistant", "从前有座山山里有座庙")],
+        )
+
+    async def test_interrupt_frame_stops_active_reply(self) -> None:
+        """An INTERRUPT control frame cuts the reply in flight."""
+        model = ScriptedModel([REPLY_R1])
+        agent = RealtimeAgent("Friday", "be brief", model)
+        transport = GatedTransport(
+            [ControlFrame(type=ControlFrameType.INTERRUPT)],
+        )
+
+        reply_ends = []
+        async with agent, transport:
+            async for event in agent.reply_stream(transport):
+                if isinstance(event, TextBlockDeltaEvent):
+                    if event.delta == "老和尚":
+                        transport.gate.set()
+                elif isinstance(event, ReplyEndEvent):
+                    reply_ends.append((event.reply_id, event.finished_reason))
+
+        self.assertListEqual(
+            reply_ends,
+            [("u1", "completed"), ("r1", "interrupted")],
+        )
+        self.assertListEqual(
+            model.calls,
+            [
+                "connect(session=1,td_off=False)",
+                "truncate(r1,320ms,'从前有座山山里有座庙')",
+                "cancel",
+                "close",
+            ],
+        )
 
     async def test_provider_timeout_reconnects_on_next_audio(self) -> None:
         """When the provider closes the session, nothing reconnects until
