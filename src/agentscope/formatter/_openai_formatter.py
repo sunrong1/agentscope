@@ -5,7 +5,7 @@ from abc import ABC
 from fnmatch import fnmatch
 from typing import Any
 
-import requests
+import httpx
 from pydantic import Field
 
 from ._formatter_base import FormatterBase
@@ -27,7 +27,7 @@ class _OpenAIFormatterBase(FormatterBase, ABC):
     """Base class for OpenAI formatters, providing shared data block
     formatting logic."""
 
-    def _format_openai_data_block(
+    async def _format_openai_data_block(
         self,
         block: DataBlock,
     ) -> dict[str, Any] | None:
@@ -64,10 +64,10 @@ class _OpenAIFormatterBase(FormatterBase, ABC):
             return self._format_image_source(block.source)
 
         if main_type == "audio":
-            return self._format_audio_source(block.source)
+            return await self._format_audio_source(block.source)
 
         if block.source.media_type == "application/pdf":
-            return self._format_file_source(block.source, block.name)
+            return await self._format_file_source(block.source, block.name)
 
         logger.warning(
             "Unsupported main media type %s for OpenAI API. "
@@ -120,7 +120,7 @@ class _OpenAIFormatterBase(FormatterBase, ABC):
         }
 
     @staticmethod
-    def _format_audio_source(
+    async def _format_audio_source(
         source: URLSource | Base64Source,
     ) -> dict[str, Any]:
         """Convert an audio source to OpenAI input_audio format.
@@ -167,7 +167,8 @@ class _OpenAIFormatterBase(FormatterBase, ABC):
                     data = base64.b64encode(f.read()).decode("utf-8")
             else:
                 # Remote URL — download and encode
-                response = requests.get(url_str, timeout=30)
+                async with httpx.AsyncClient(timeout=30) as client:
+                    response = await client.get(url_str)
                 response.raise_for_status()
                 data = base64.b64encode(response.content).decode("utf-8")
 
@@ -182,7 +183,7 @@ class _OpenAIFormatterBase(FormatterBase, ABC):
         raise TypeError(f"Unsupported audio source type: {type(source)}.")
 
     @staticmethod
-    def _format_file_source(
+    async def _format_file_source(
         source: URLSource | Base64Source,
         name: str | None,
     ) -> dict[str, Any]:
@@ -211,7 +212,8 @@ class _OpenAIFormatterBase(FormatterBase, ABC):
                 with open(url_str.removeprefix("file://"), "rb") as f:
                     data = base64.b64encode(f.read()).decode("utf-8")
             else:
-                response = requests.get(url_str, timeout=30)
+                async with httpx.AsyncClient(timeout=30) as client:
+                    response = await client.get(url_str)
                 response.raise_for_status()
                 data = base64.b64encode(response.content).decode("utf-8")
         else:
@@ -281,7 +283,7 @@ class OpenAIChatFormatter(_OpenAIFormatterBase):
                     content_blocks.append({"type": "text", "text": block.text})
 
                 elif isinstance(block, DataBlock):
-                    formatted = self._format_openai_data_block(
+                    formatted = await self._format_openai_data_block(
                         block,
                     )
                     if formatted is not None:
@@ -317,8 +319,10 @@ class OpenAIChatFormatter(_OpenAIFormatterBase):
                                     {"type": "text", "text": sub.text},
                                 )
                             elif isinstance(sub, DataBlock):
-                                formatted_sub = self._format_openai_data_block(
-                                    sub,
+                                formatted_sub = (
+                                    await self._format_openai_data_block(
+                                        sub,
+                                    )
                                 )
                                 if formatted_sub is not None:
                                     hint_parts.append(formatted_sub)
@@ -374,8 +378,10 @@ class OpenAIChatFormatter(_OpenAIFormatterBase):
                                     {"type": "text", "text": item.text},
                                 )
                             elif isinstance(item, DataBlock):
-                                fmt_item = self._format_openai_data_block(
-                                    item,
+                                fmt_item = (
+                                    await self._format_openai_data_block(
+                                        item,
+                                    )
                                 )
                                 if fmt_item is not None:
                                     promo_content.append(fmt_item)
@@ -516,7 +522,7 @@ class OpenAIMultiAgentFormatter(_OpenAIFormatterBase):
                     accumulated_text.append(f"{msg.name}: {block.text}")
 
                 elif isinstance(block, DataBlock):
-                    formatted = self._format_openai_data_block(
+                    formatted = await self._format_openai_data_block(
                         block,
                     )
                     if formatted is not None:

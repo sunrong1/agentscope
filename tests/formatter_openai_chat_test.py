@@ -4,7 +4,7 @@ OpenAIMultiAgentFormatter, following the reference test style with exact
 ground-truth comparisons.
 """
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 from agentscope.formatter import (
     OpenAIChatFormatter,
@@ -420,35 +420,43 @@ class TestOpenAIFormatter(IsolatedAsyncioTestCase):
             },
         )
 
-    @patch("agentscope.formatter._openai_formatter.requests.get")
-    async def test_chat_formatter_extensionless_url_audio(
-        self,
-        mock_get: Mock,
-    ) -> None:
+    async def test_chat_formatter_extensionless_url_audio(self) -> None:
         """Declared media type controls extensionless URL audio format."""
-        mock_get.return_value.content = b"wav data"
         fmt = OpenAIChatFormatter()
 
-        res = await fmt.format(
-            [
-                UserMsg(
-                    name="user",
-                    content=[
-                        DataBlock(
-                            source=URLSource(
-                                url="https://example.com/download?token=abc",
-                                media_type="audio/wav",
+        with patch(
+            "agentscope.formatter._openai_formatter.httpx.AsyncClient",
+        ) as mock_client_cls:
+            mock_response = Mock()
+            mock_response.content = b"wav data"
+            mock_client = AsyncMock()
+            mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+            mock_client.__aexit__ = AsyncMock(return_value=None)
+            mock_client.get = AsyncMock(return_value=mock_response)
+            mock_client_cls.return_value = mock_client
+
+            res = await fmt.format(
+                [
+                    UserMsg(
+                        name="user",
+                        content=[
+                            DataBlock(
+                                source=URLSource(
+                                    url=(
+                                        "https://example.com/"
+                                        "download?token=abc"
+                                    ),
+                                    media_type="audio/wav",
+                                ),
                             ),
-                        ),
-                    ],
-                ),
-            ],
-        )
+                        ],
+                    ),
+                ],
+            )
 
         self.assertEqual(res[0]["content"][0]["input_audio"]["format"], "wav")
-        mock_get.assert_called_once_with(
+        mock_client.get.assert_awaited_once_with(
             "https://example.com/download?token=abc",
-            timeout=30,
         )
 
     async def test_chat_formatter_thinking_dropped(self) -> None:
