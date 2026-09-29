@@ -69,8 +69,17 @@ class ToolContext(BaseModel):
                 if mtime is None:
                     try:
                         mtime = await aiofiles.os.path.getmtime(file_path)
-                    except Exception:
+                    except FileNotFoundError:
+                        # The file is genuinely gone: fall through so the
+                        # entry is evicted below.
                         mtime = None
+                    except Exception:
+                        # A transient I/O failure (permission race, a
+                        # network mount flapping, fd exhaustion) is not
+                        # evidence that the file is gone. Report a miss
+                        # but keep the entry so a later call can retry
+                        # once the filesystem settles.
+                        return None
 
                 # Concurrent calls may have reordered or dropped the entry
                 # while awaiting, so locate it again by the object itself.

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """File cache test case for Read/Write/Edit tools."""
+
 import asyncio
 import os
 import tempfile
@@ -272,6 +273,54 @@ class FileCacheTest(IsolatedAsyncioTestCase):
             sum(entry.bytes for entry in context.read_file_cache),
             context.max_cache_bytes,
         )
+
+    async def test_transient_io_error_keeps_cache_entry(self) -> None:
+        """A transient ``getmtime`` failure is a miss, not an eviction.
+
+        ``ToolContext.get_cache`` used to translate a failing ``getmtime``
+        into ``mtime = None``, which then failed the ``mtime !=
+        entry.updated_at`` comparison and dropped the entry. A permission
+        race or a flapping network mount is not evidence that the file is
+        gone, so the entry must survive so a later call can retry.
+        """
+        ctx = ToolContext()
+        await ctx.cache_file("/repo/a.txt", lines=["x"], mtime=1000.0)
+        self.assertEqual(len(ctx.read_file_cache), 1)
+
+        with patch(
+            "aiofiles.os.path.getmtime",
+            side_effect=OSError("transient"),
+        ):
+            self.assertIsNone(await ctx.get_cache("/repo/a.txt"))
+
+        self.assertEqual(len(ctx.read_file_cache), 1)
+
+        # The filesystem settled — the same call now hits.
+        with patch("aiofiles.os.path.getmtime", return_value=1000.0):
+            entry = await ctx.get_cache("/repo/a.txt")
+
+        self.assertIsNotNone(entry)
+        self.assertEqual(entry.file_path, "/repo/a.txt")
+
+    async def test_deleted_file_still_evicts_cache_entry(self) -> None:
+        """A file that really is gone must still be evicted."""
+        with open(self.test_file, "w", encoding="utf-8") as f:
+            f.write("Test content\n")
+
+        await self.read_tool(
+            file_path=self.test_file,
+            _agent_state=self.state,
+        )
+        self.assertEqual(len(self.state.tool_context.read_file_cache), 1)
+
+        os.unlink(self.test_file)
+
+        # No ``mtime`` passed, so ``get_cache`` falls back to ``getmtime``,
+        # which now raises ``FileNotFoundError``.
+        cache = await self.state.tool_context.get_cache(self.test_file)
+
+        self.assertIsNone(cache)
+        self.assertEqual(len(self.state.tool_context.read_file_cache), 0)
 
     async def test_cache_hit_refreshes_lru_recency(self) -> None:
         """Test cache hits keep recently used files from being evicted."""
