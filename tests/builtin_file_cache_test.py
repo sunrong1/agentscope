@@ -12,6 +12,7 @@ from agentscope.state._state import ReadCacheEntry
 from agentscope.tool import Read, Write, Edit
 
 
+# pylint: disable=too-many-public-methods
 class FileCacheTest(IsolatedAsyncioTestCase):
     """Test file cache functionality for Read/Write/Edit tools."""
 
